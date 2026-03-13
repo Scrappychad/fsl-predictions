@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FSL Predictions — Fredrick Strategy Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #060608;
+  --metal-1:   #0d0d12;
+  --metal-2:   #111118;
+  --metal-3:   #161620;
+  --metal-4:   #1c1c28;
+  --metal-5:   #222232;
+  --shine:     rgba(255,255,255,0.04);
+  --shine2:    rgba(255,255,255,0.08);
+  --shine3:    rgba(255,255,255,0.13);
+  --line:      rgba(255,255,255,0.05);
+  --line2:     rgba(255,255,255,0.09);
+  --line3:     rgba(255,255,255,0.16);
+  --text:      #f2f2fa;
+  --text2:     #8888a8;
+  --text3:     #4a4a62;
+  --gold:      #d4a843;
+  --gold-hi:   #f0c860;
+  --gold-lo:   #8a6820;
+  --gold-bg:   rgba(212,168,67,0.07);
+  --gold-bg2:  rgba(212,168,67,0.14);
+  --green:     #3ecf78;
+  --green-bg:  rgba(62,207,120,0.07);
+  --amber:     #f09030;
+  --amber-bg:  rgba(240,144,48,0.07);
+  --red:       #e85555;
+  --red-bg:    rgba(232,85,85,0.07);
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Bebas Neue', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 40% at 20% 0%, rgba(212,168,67,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 100%, rgba(80,144,232,0.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.018;
+  pointer-events: none;
+}
+header {
+  position: sticky; top: 0; z-index: 500;
+  background: rgba(6,6,8,0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--line2);
+}
+header::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-lo), transparent);
+}
+.hdr {
+  max-width: 1040px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 64px;
+}
+.logo {
+  font-family: var(--display);
+  font-size: 22px; letter-spacing: 3px;
+  display: flex; align-items: center;
+}
+.logo-sep { color: var(--gold); margin: 0 10px; font-size: 18px; }
+.logo-pred { color: var(--text2); }
+.hdr-right { display: flex; align-items: center; gap: 24px; }
+.live-wrap {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--green); letter-spacing: 1.5px; text-transform: uppercase;
+}
+.live-ring { position: relative; width: 10px; height: 10px; }
+.live-ring::before, .live-ring::after { content: ''; position: absolute; inset: 0; border-radius: 50%; }
+.live-ring::before { background: var(--green); animation: ping 2s ease-out infinite; }
+.live-ring::after  { background: var(--green); margin: 2px; }
+@keyframes ping { 0%{transform:scale(1);opacity:.8} 100%{transform:scale(2.2);opacity:0} }
+.hdr-date { font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: .5px; }
+
+.hero {
+  position: relative; overflow: hidden;
+  background: var(--metal-1);
+  border-bottom: 1px solid var(--line2); z-index: 1;
+}
+.hero-scanlines {
+  position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.008) 2px,rgba(255,255,255,.008) 4px);
+  pointer-events: none;
+}
+.hero-glow {
+  position: absolute; top: -60px; left: -60px;
+  width: 500px; height: 300px;
+  background: radial-gradient(ellipse, rgba(212,168,67,.06) 0%, transparent 70%);
+  pointer-events: none;
+  animation: heroGlow 6s ease-in-out infinite alternate;
+}
+@keyframes heroGlow { from{transform:translate(0,0) scale(1)} to{transform:translate(60px,20px) scale(1.1)} }
+.hero-inner {
+  max-width: 1040px; margin: 0 auto;
+  padding: 48px 28px 40px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 32px; flex-wrap: wrap; position: relative; z-index: 1;
+}
+.hero-eyebrow {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--gold); letter-spacing: 3px; text-transform: uppercase;
+  margin-bottom: 10px; opacity: 0;
+  animation: fadeUp .6s .1s ease forwards;
+}
+.hero-h1 {
+  font-family: var(--display);
+  font-size: clamp(52px,9vw,96px);
+  letter-spacing: 2px; line-height: .88; color: var(--text);
+  opacity: 0; animation: fadeUp .6s .2s ease forwards;
+}
+.hero-h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg,var(--gold-hi),var(--gold),var(--gold-lo));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-tagline {
+  font-size: 13px; color: var(--text3); margin-top: 14px;
+  font-family: var(--mono); letter-spacing: .5px;
+  opacity: 0; animation: fadeUp .6s .35s ease forwards;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.hero-stats {
+  display: flex; gap: 2px;
+  background: var(--metal-2);
+  border: 1px solid var(--line2);
+  border-radius: 16px; overflow: hidden; flex-shrink: 0;
+  opacity: 0; animation: fadeUp .6s .4s ease forwards;
+}
+.hstat {
+  padding: 18px 26px; text-align: center;
+  border-right: 1px solid var(--line);
+  min-width: 84px; transition: background .2s; cursor: default;
+}
+.hstat:hover { background: var(--metal-3); }
+.hstat:last-child { border-right: none; }
+.hstat-num {
+  font-family: var(--display);
+  font-size: 40px; letter-spacing: 1px; line-height: 1;
+  display: block; transition: transform .3s;
+}
+.hstat:hover .hstat-num { transform: scale(1.06); }
+.hstat-num.gold  { color: var(--gold); }
+.hstat-num.green { color: var(--green); }
+.hstat-num.amber { color: var(--amber); }
+.hstat-num.plain { color: var(--text); }
+.hstat-lbl { font-family: var(--mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 5px; display: block; }
+.hero-corner { position: absolute; bottom: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 0 60px 60px; border-color: transparent transparent var(--bg) transparent; }
+
+.controls-wrap { position: relative; z-index: 1; background: var(--metal-1); border-bottom: 1px solid var(--line); }
+.controls { max-width: 1040px; margin: 0 auto; padding: 14px 28px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ctrl-lbl { font-family: var(--mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; margin-right: 6px; }
+.ftag { font-size: 11px; font-weight: 500; font-family: 'Outfit',sans-serif; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--line2); background: transparent; color: var(--text3); cursor: pointer; transition: all .18s; }
+.ftag:hover { border-color: var(--line3); color: var(--text); background: var(--shine); }
+.ftag.on { background: var(--gold-bg2); border-color: var(--gold-lo); color: var(--gold-hi); font-weight: 600; }
+
+.wrap { max-width: 1040px; margin: 0 auto; padding: 24px 28px 100px; position: relative; z-index: 1; }
+
+.card {
+  position: relative;
+  background: var(--metal-1);
+  border: 1px solid var(--line2);
+  border-radius: 16px; margin-bottom: 10px;
+  overflow: hidden; cursor: pointer;
+  opacity: 0; animation: cardIn .4s ease forwards;
+  transition: border-color .2s, box-shadow .2s, transform .15s;
+}
+.card:hover {
+  border-color: var(--line3);
+  box-shadow: 0 8px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04);
+  transform: translateY(-1px);
+}
+.card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg,var(--shine) 0%,transparent 50%);
+  pointer-events: none; border-radius: 16px; opacity: 0; transition: opacity .2s;
+}
+.card:hover::before { opacity: 1; }
+.card.is-con { border-left: 3px solid var(--green); }
+.card.is-con .card-glow { background: linear-gradient(90deg,var(--green-bg),transparent); }
+.card.is-hi  { border-left: 3px solid var(--gold); }
+.card.is-hi  .card-glow { background: linear-gradient(90deg,var(--gold-bg),transparent); }
+.card-glow { position: absolute; top: 0; left: 0; bottom: 0; width: 100px; pointer-events: none; }
+@keyframes cardIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+.card-face {
+  display: grid;
+  grid-template-columns: 120px 1fr 160px 120px;
+  align-items: center; gap: 20px;
+  padding: 20px 50px 20px 24px;
+  position: relative; z-index: 1;
+}
+.card-top-row { display: contents; }
+.mobile-bottom-row { display: contents; }
+.lname { font-family: var(--mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; }
+.ktime { font-family: var(--display); font-size: 30px; letter-spacing: 2px; color: var(--gold); line-height: 1; }
+.matchup-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: nowrap; }
+.tname { font-family: var(--display); font-size: 18px; letter-spacing: .5px; color: var(--text); line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+.vs-chip { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 1px; flex-shrink: 0; background: var(--metal-3); padding: 3px 7px; border-radius: 4px; border: 1px solid var(--line); }
+.pos-row { display: flex; gap: 14px; }
+.pos-item { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+.pos-item b { color: var(--text2); font-weight: 500; }
+.sbadge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 6px 12px; border-radius: 6px; margin-bottom: 7px;
+}
+.sbadge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.sbadge.con { background: var(--green-bg); color: var(--green); border: 1px solid rgba(62,207,120,.18); }
+.sbadge.con::before { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.sbadge.spl { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(240,144,48,.18); }
+.sbadge.spl::before { background: var(--amber); }
+.sbadge.avd { background: var(--red-bg); color: var(--red); border: 1px solid rgba(232,85,85,.18); }
+.sbadge.avd::before { background: var(--red); }
+.sig-mini { font-family: var(--mono); font-size: 10px; color: var(--text3); display: block; }
+.oc { text-align: right; }
+.out-label { font-family: var(--display); font-size: 24px; letter-spacing: 1px; color: var(--text); line-height: 1; margin-bottom: 2px; }
+.out-score { font-family: var(--mono); font-size: 12px; color: var(--gold-lo); margin-bottom: 8px; letter-spacing: 1px; }
+.cbar-track { height: 4px; background: var(--metal-4); border-radius: 2px; margin-bottom: 5px; overflow: hidden; }
+.cbar-fill { height: 4px; border-radius: 2px; width: 0; transition: width 1s cubic-bezier(.4,0,.2,1); }
+.cnum { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.chevron {
+  position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  color: var(--text3); transition: transform .25s, color .2s;
+  background: var(--metal-3); border: 1px solid var(--line); border-radius: 50%;
+}
+.card.open .chevron { transform: translateY(-50%) rotate(180deg); color: var(--gold); border-color: var(--gold-lo); background: var(--gold-bg); }
+
+.expand { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .32s cubic-bezier(.4,0,.2,1); }
+.expand.open { grid-template-rows: 1fr; }
+.expand-inner { overflow: hidden; }
+.expand-body { border-top: 1px solid var(--line); background: var(--metal-2); padding: 24px 24px 20px; }
+.exp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 18px; }
+.exp-block-title { font-family: var(--mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px; }
+.prob-cols { display: flex; gap: 12px; align-items: flex-end; height: 70px; }
+.pbc { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.pbc-pct { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text); }
+.pbc-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height .8s cubic-bezier(.4,0,.2,1); }
+.pbc-lbl { font-family: var(--mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+.sig-rows { }
+.sig-line { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--metal-3); border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--line); transition: background .15s; }
+.sig-line:hover { background: var(--metal-4); }
+.sl-key { font-family: var(--mono); font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+.sl-val { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--text); }
+.detail-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 12px; }
+.dcel { background: var(--metal-3); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; transition: background .15s; }
+.dcel:hover { background: var(--metal-4); }
+.dcel label { font-family: var(--mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
+.dcel span  { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--text); }
+.corners-bar { background: var(--metal-3); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; font-family: var(--mono); font-size: 11px; color: var(--text3); line-height: 1.6; }
+.corners-bar strong { color: var(--gold); }
+.state-msg { text-align: center; padding: 100px 0; font-family: var(--mono); font-size: 13px; color: var(--text3); letter-spacing: 1px; }
+footer { position: relative; z-index: 1; border-top: 1px solid var(--line2); padding: 24px 28px; text-align: center; font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; background: var(--metal-1); }
+footer::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 200px; height: 1px; background: linear-gradient(90deg,transparent,var(--gold-lo),transparent); }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--metal-5); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+@media (max-width:768px) {
+  /* header */
+  .hdr { padding: 0 16px; height: 56px; }
+  .logo { font-size: 18px; letter-spacing: 2px; }
+  .hdr-date { display: none; }
+
+  /* hero */
+  .hero-inner { padding: 28px 16px 24px; flex-direction: column; align-items: flex-start; gap: 24px; }
+  .hero-h1 { font-size: 56px; }
+  .hero-eyebrow { font-size: 9px; letter-spacing: 2px; }
+  .hero-tagline { font-size: 11px; }
+  .hero-stats { width: 100%; border-radius: 12px; }
+  .hstat { padding: 14px 10px; flex: 1; min-width: 0; }
+  .hstat-num { font-size: 28px; }
+  .hstat-lbl { font-size: 8px; letter-spacing: 1px; }
+
+  /* controls */
+  .controls { padding: 12px 16px; gap: 8px; }
+  .ftag { font-size: 11px; padding: 5px 11px; }
+
+  /* wrap */
+  .wrap { padding: 14px 12px 80px; }
+
+  /* card face — stack into two rows */
+  .card-face {
+    display: flex; flex-direction: column;
+    gap: 0; padding: 16px 16px 14px;
+  }
+  .card-face > div { width: 100%; }
+
+  /* top row: league + time left, outcome right */
+  .card-top-row {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; margin-bottom: 10px;
+  }
+  .lname { margin-bottom: 4px; }
+  .ktime { font-size: 22px; }
+
+  /* teams */
+  .matchup-row { flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+  .tname { font-size: 17px; max-width: none; white-space: normal; }
+  .vs-chip { font-size: 8px; padding: 2px 6px; }
+
+  /* signal + outcome row */
+  .mobile-bottom-row {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+  .sgc { display: block; }
+  .oc { display: block; text-align: right; }
+  .out-label { font-size: 18px; }
+  .out-score { font-size: 11px; margin-bottom: 4px; }
+  .cbar-track { width: 80px; margin-left: auto; }
+  .cnum { font-size: 10px; }
+
+  /* chevron */
+  .chevron { top: 16px; right: 14px; transform: none; width: 24px; height: 24px; }
+  .card.open .chevron { transform: rotate(180deg); }
+
+  /* expanded */
+  .expand-body { padding: 16px; }
+  .exp-grid { grid-template-columns: 1fr; gap: 16px; margin-bottom: 14px; }
+  .prob-cols { height: 60px; }
+  .detail-row { grid-template-columns: repeat(2,1fr); gap: 6px; margin-bottom: 10px; }
+  .dcel { padding: 10px 12px; }
+  .dcel span { font-size: 13px; }
+  .corners-bar { font-size: 10px; padding: 10px 12px; }
+  .sig-line { padding: 8px 12px; }
+}
+
+@media (max-width:400px) {
+  .hero-h1 { font-size: 44px; }
+  .hstat-num { font-size: 24px; }
+  .hstat { padding: 12px 8px; }
+  .tname { font-size: 15px; }
+  .ktime { font-size: 19px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr">
+    <div class="logo">
+      <span>FSL</span>
+      <span class="logo-sep">/</span>
+      <span class="logo-pred">PREDICTIONS</span>
+    </div>
+    <div class="hdr-right">
+      <div class="live-wrap"><div class="live-ring"></div>Live</div>
+      <div class="hdr-date" id="hdr-date">–</div>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-scanlines"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">Fredrick Strategy Lab &mdash; AI-Powered Analysis</div>
+      <div class="hero-h1">TODAY'S<br><em>PICKS</em></div>
+      <div class="hero-tagline" id="hero-date-line">Loading predictions…</div>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><span class="hstat-num gold" id="s-total">–</span><span class="hstat-lbl">Fixtures</span></div>
+      <div class="hstat"><span class="hstat-num green" id="s-con">–</span><span class="hstat-lbl">Consensus</span></div>
+      <div class="hstat"><span class="hstat-num amber" id="s-spl">–</span><span class="hstat-lbl">Splits</span></div>
+      <div class="hstat"><span class="hstat-num plain" id="s-hc">–</span><span class="hstat-lbl">High conf</span></div>
+    </div>
+  </div>
+  <div class="hero-corner"></div>
+</div>
+
+<div class="controls-wrap">
+  <div class="controls">
+    <span class="ctrl-lbl">League</span>
+    <div id="filters" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="cards"><div class="state-msg">Loading predictions…</div></div>
+</div>
+
+<footer>FSL Predictions &nbsp;&mdash;&nbsp; Fredrick Strategy Lab &nbsp;&mdash;&nbsp; For informational purposes only</footer>
+
+<script>
+let ALL = [], active = "All";
+const fmt = (n, d=1) => Number(n).toFixed(d);
+
+function confColor(c) {
+  if (c >= 65) return "#d4a843";
+  if (c >= 42) return "#f09030";
+  return "#4a4a62";
+}
+
+function dayLabel(s) {
+  return new Date(s + "T12:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+}
+
+function animateNum(el, target) {
+  const dur = 700;
+  const t0  = performance.now();
+  const tick = now => {
+    const p    = Math.min((now - t0) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(ease * target);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function render() {
+  const list = active === "All" ? ALL : ALL.filter(d => d.league === active);
+
+  animateNum(document.getElementById("s-total"), list.length);
+  animateNum(document.getElementById("s-con"),   list.filter(d => d.consensus === "consensus").length);
+  animateNum(document.getElementById("s-spl"),   list.filter(d => d.consensus === "split").length);
+  animateNum(document.getElementById("s-hc"),    list.filter(d => d.conf >= 65).length);
+
+  const wrap = document.getElementById("cards");
+  if (!list.length) { wrap.innerHTML = '<div class="state-msg">No fixtures for this selection.</div>'; return; }
+
+  wrap.innerHTML = list.map((d, i) => {
+    const isCon = d.consensus === "consensus";
+    const isHi  = d.conf >= 65;
+    const isAvd = !isCon && d.conf < 28;
+    const bCls  = isCon ? "con" : isAvd ? "avd" : "spl";
+    const bTxt  = isCon ? "Consensus" : isAvd ? "Avoid" : "Split";
+    const cCls  = isCon ? "card is-con" : isHi ? "card is-hi" : "card";
+    const outFl = d.outcome + (d.uncertain ? " ?" : "");
+    const col   = confColor(d.conf);
+    const sigM  = isCon ? `Data & Num: ${d.data_sig}` : `D: ${d.data_sig}  /  N: ${d.num_sig}`;
+    const MH = 60;
+    const hH = Math.max(5, Math.round(d.hw/100*MH));
+    const dH = Math.max(5, Math.round(d.dr/100*MH));
+    const aH = Math.max(5, Math.round(d.aw/100*MH));
+
+    return `<div class="${cCls}" id="c${i}" style="animation-delay:${i*.06}s">
+  <div class="card-glow"></div>
+  <div class="card-face" onclick="tog(${i})">
+    <div class="card-top-row">
+      <div>
+        <div class="lname">${d.league}</div>
+        <div class="ktime">${d.time}</div>
+      </div>
+    </div>
+    <div>
+      <div class="matchup-row">
+        <div class="tname">${d.home}</div>
+        <div class="vs-chip">VS</div>
+        <div class="tname">${d.away}</div>
+      </div>
+      <div class="pos-row">
+        <div class="pos-item">Home <b>${d.hpos}</b></div>
+        <div class="pos-item">Away <b>${d.apos}</b></div>
+      </div>
+    </div>
+    <div class="mobile-bottom-row">
+      <div class="sgc">
+        <div class="sbadge ${bCls}">${bTxt}</div>
+        <span class="sig-mini">${sigM}</span>
+      </div>
+      <div class="oc">
+        <div class="out-label">${outFl}</div>
+        <div class="out-score">${d.score}</div>
+        <div class="cbar-track"><div class="cbar-fill" id="bar${i}" style="background:${col}"></div></div>
+        <div class="cnum">${fmt(d.conf)}% conf</div>
+      </div>
+    </div>
+    <div class="chevron">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+  <div class="expand" id="e${i}">
+    <div class="expand-inner">
+      <div class="expand-body">
+        <div class="exp-grid">
+          <div>
+            <div class="exp-block-title">Win probability</div>
+            <div class="prob-cols">
+              <div class="pbc"><div class="pbc-pct">${fmt(d.hw)}%</div><div class="pbc-bar" style="height:${hH}px;background:#4a80d4"></div><div class="pbc-lbl">Home</div></div>
+              <div class="pbc"><div class="pbc-pct">${fmt(d.dr)}%</div><div class="pbc-bar" style="height:${dH}px;background:#3a3a52"></div><div class="pbc-lbl">Draw</div></div>
+              <div class="pbc"><div class="pbc-pct">${fmt(d.aw)}%</div><div class="pbc-bar" style="height:${aH}px;background:#c05038"></div><div class="pbc-lbl">Away</div></div>
+            </div>
+          </div>
+          <div>
+            <div class="exp-block-title">Signal breakdown</div>
+            <div class="sig-rows">
+              <div class="sig-line"><span class="sl-key">Data signal</span><span class="sl-val">${d.data_sig}</span></div>
+              <div class="sig-line"><span class="sl-key">Num signal</span><span class="sl-val">${d.num_sig}</span></div>
+              <div class="sig-line"><span class="sl-key">Verdict</span><span class="sl-val">${bTxt}</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="dcel"><label>Predicted score</label><span>${d.score}</span></div>
+          <div class="dcel"><label>Confidence</label><span>${fmt(d.conf)}%</span></div>
+          <div class="dcel"><label>Gap %</label><span>${fmt(d.gap)}%</span></div>
+          <div class="dcel"><label>Corners</label><span>${d.corners}</span></div>
+        </div>
+        <div class="corners-bar"><strong>Corners O/U</strong> &nbsp;→&nbsp; ${d.corners_note}</div>
+      </div>
+    </div>
+  </div>
+</div>`;
+  }).join("");
+
+  requestAnimationFrame(() => {
+    list.forEach((d, i) => {
+      const bar = document.getElementById("bar" + i);
+      if (bar) setTimeout(() => { bar.style.width = Math.round(d.conf) + "%"; }, 80 + i * 55);
+    });
+  });
+}
+
+function tog(i) {
+  const card = document.getElementById("c" + i);
+  const exp  = document.getElementById("e" + i);
+  card.classList.toggle("open");
+  exp.classList.toggle("open");
+}
+
+function buildFilters(data) {
+  const leagues = ["All", ...new Set(data.map(d => d.league))];
+  document.getElementById("filters").innerHTML = leagues.map(l =>
+    `<button class="ftag${l===active?" on":""}" onclick="setL('${l}')">${l}</button>`
+  ).join("");
+}
+
+function setL(l) { active = l; buildFilters(ALL); render(); }
+
+async function load() {
+  try {
+    const res  = await fetch("predictions.json?t=" + Date.now());
+    const json = await res.json();
+    ALL = json.fixtures || [];
+    document.getElementById("hdr-date").textContent     = json.generated;
+    document.getElementById("hero-date-line").textContent = dayLabel(json.generated) + " — " + json.version;
+    buildFilters(ALL);
+    render();
+  } catch(e) {
+    document.getElementById("cards").innerHTML = '<div class="state-msg">Could not load predictions. Check back soon.</div>';
+    document.getElementById("hero-date-line").textContent = "–";
+  }
+}
+
+load();
+</script>
+</body>
+</html>
