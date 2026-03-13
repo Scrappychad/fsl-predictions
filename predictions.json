@@ -20,9 +20,9 @@
       "consensus": "split",
       "data_sig": "Draw",
       "num_sig": "Away",
-      "corners": "4.3 - 4.3",
-      "corners_total": 8.6,
-      "corners_note": "Total 8.6 | O8.5: Under (50.9%) | O9.5: Under (64.0%)"
+      "corners": "5.0 - 5.0",
+      "corners_total": 5.0,
+      "corners_note": "8.5: Under 8 (50.9%)  |  9.5: Under 9 (64.0%)  |  10.5: Under 10 (75.2%)"
     },
     {
       "league": "Eredivisie",
@@ -42,39 +42,39 @@
       "consensus": "split",
       "data_sig": "Draw",
       "num_sig": "Away",
-      "corners": "4.9 - 5.1",
-      "corners_total": 10.0,
-      "corners_note": "Total 10.0 | O8.5: 66.7% | O9.5: 54.2%"
+      "corners": "5.0 - 5.0",
+      "corners_total": 5.0,
+      "corners_note": "8.5: Over 8 (66.7%)  |  9.5: Over 9 (54.2%)  |  10.5: Under 10 (58.3%)"
     },
     {
       "league": "Bundesliga",
       "time": "19:30",
-      "home": "Borussia M'gladbach",
-      "away": "FC St. Pauli",
+      "home": "Borussia Mönchengladbach",
+      "away": "FC St. Pauli 1910",
       "hpos": "12",
       "apos": "16",
       "hw": 42.1,
       "dr": 30.1,
       "aw": 27.8,
-      "outcome": "Home",
+      "outcome": "Draw",
       "uncertain": true,
       "conf": 30.1,
       "gap": 14.3,
       "score": "2-0",
       "consensus": "split",
-      "data_sig": "Home",
+      "data_sig": "Draw",
       "num_sig": "Away",
-      "corners": "5.1 - 4.9",
-      "corners_total": 10.0,
-      "corners_note": "Total 10.0 | O8.5: 66.7% | O9.5: 54.2%"
+      "corners": "5.0 - 5.0",
+      "corners_total": 5.0,
+      "corners_note": "8.5: Over 8 (66.7%)  |  9.5: Over 9 (54.2%)  |  10.5: Under 10 (58.3%)"
     },
     {
       "league": "Serie A",
       "time": "19:45",
       "home": "Torino FC",
-      "away": "Parma Calcio",
-      "hpos": "13",
-      "apos": "15",
+      "away": "Parma Calcio 1913",
+      "hpos": "15",
+      "apos": "12",
       "hw": 30.5,
       "dr": 35.6,
       "aw": 33.9,
@@ -86,9 +86,9 @@
       "consensus": "consensus",
       "data_sig": "Draw",
       "num_sig": "Draw",
-      "corners": "5.1 - 4.9",
-      "corners_total": 10.0,
-      "corners_note": "Total 10.0 | O8.5: 66.7% | O9.5: 54.2%"
+      "corners": "5.0 - 5.0",
+      "corners_total": 5.0,
+      "corners_note": "8.5: Over 8 (66.7%)  |  9.5: Over 9 (54.2%)  |  10.5: Under 10 (58.3%)"
     },
     {
       "league": "Ligue 1",
@@ -108,9 +108,9 @@
       "consensus": "split",
       "data_sig": "Home",
       "num_sig": "Away",
-      "corners": "5.8 - 4.2",
-      "corners_total": 10.0,
-      "corners_note": "Total 10.0 | O8.5: 66.7% | O9.5: 54.2%"
+      "corners": "5.0 - 5.0",
+      "corners_total": 5.0,
+      "corners_note": "8.5: Over 8 (66.7%)  |  9.5: Over 9 (54.2%)  |  10.5: Under 10 (58.3%)"
     },
     {
       "league": "Pro League",
@@ -122,7 +122,7 @@
       "hw": 37.7,
       "dr": 26.7,
       "aw": 35.7,
-      "outcome": "Home",
+      "outcome": "Draw",
       "uncertain": true,
       "conf": 26.7,
       "gap": 11.0,
@@ -130,9 +130,9 @@
       "consensus": "split",
       "data_sig": "Draw",
       "num_sig": "Home",
-      "corners": "4.3 - 4.3",
-      "corners_total": 8.6,
-      "corners_note": "Total 8.6 | O8.5: Under (50.9%) | O9.5: Under (64.0%)"
+      "corners": "5.0 - 5.0",
+      "corners_total": 5.0,
+      "corners_note": "8.5: Under 8 (50.9%)  |  9.5: Under 9 (64.0%)  |  10.5: Under 10 (75.2%)"
     },
     {
       "league": "La Liga",
@@ -152,15 +152,15 @@
       "consensus": "split",
       "data_sig": "Away",
       "num_sig": "Home",
-      "corners": "4.6 - 5.4",
-      "corners_total": 10.0,
-      "corners_note": "Total 10.0 | O8.5: 66.7% | O9.5: 54.2%"
+      "corners": "5.0 - 5.0",
+      "corners_total": 5.0,
+      "corners_note": "8.5: Over 8 (66.7%)  |  9.5: Over 9 (54.2%)  |  10.5: Under 10 (58.3%)"
     },
     {
       "league": "Championship",
       "time": "20:00",
       "home": "Wrexham AFC",
-      "away": "Swansea City",
+      "away": "Swansea City AFC",
       "hpos": "6",
       "apos": "11",
       "hw": 59.8,
@@ -174,9 +174,9 @@
       "consensus": "split",
       "data_sig": "Home",
       "num_sig": "Away",
-      "corners": "5.2 - 4.8",
-      "corners_total": 10.0,
-      "corners_note": "Total 10.0 | O8.5: 66.7% | O9.5: 54.2%"
+      "corners": "5.0 - 5.0",
+      "corners_total": 5.0,
+      "corners_note": "8.5: Over 8 (66.7%)  |  9.5: Over 9 (54.2%)  |  10.5: Under 10 (58.3%)"
     }
   ]
 }
