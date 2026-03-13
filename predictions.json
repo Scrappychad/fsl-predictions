@@ -5,6 +5,7 @@
     {
       "league": "Brasileirão",
       "time": "04:30",
+      "kickoff_utc": "2026-03-13T04:30:00+04:00",
       "home": "Grêmio",
       "away": "Red Bull Bragantino",
       "hpos": "–",
@@ -27,6 +28,7 @@
     {
       "league": "Eredivisie",
       "time": "19:00",
+      "kickoff_utc": "2026-03-13T19:00:00+00:00",
       "home": "PEC Zwolle",
       "away": "FC Groningen",
       "hpos": "13",
@@ -49,6 +51,7 @@
     {
       "league": "Bundesliga",
       "time": "19:30",
+      "kickoff_utc": "2026-03-13T19:30:00+00:00",
       "home": "Borussia Mönchengladbach",
       "away": "FC St. Pauli 1910",
       "hpos": "12",
@@ -71,6 +74,7 @@
     {
       "league": "Serie A",
       "time": "19:45",
+      "kickoff_utc": "2026-03-13T19:45:00+00:00",
       "home": "Torino FC",
       "away": "Parma Calcio 1913",
       "hpos": "15",
@@ -93,6 +97,7 @@
     {
       "league": "Ligue 1",
       "time": "19:45",
+      "kickoff_utc": "2026-03-13T19:45:00+00:00",
       "home": "Olympique de Marseille",
       "away": "AJ Auxerre",
       "hpos": "3",
@@ -115,6 +120,7 @@
     {
       "league": "Pro League",
       "time": "23:45",
+      "kickoff_utc": "2026-03-13T23:45:00+04:00",
       "home": "KAA Gent",
       "away": "SV Zulte Waregem",
       "hpos": "–",
@@ -137,6 +143,7 @@
     {
       "league": "La Liga",
       "time": "20:00",
+      "kickoff_utc": "2026-03-13T20:00:00+00:00",
       "home": "Deportivo Alavés",
       "away": "Villarreal CF",
       "hpos": "16",
@@ -159,6 +166,7 @@
     {
       "league": "Championship",
       "time": "20:00",
+      "kickoff_utc": "2026-03-13T20:00:00+00:00",
       "home": "Wrexham AFC",
       "away": "Swansea City AFC",
       "hpos": "6",
