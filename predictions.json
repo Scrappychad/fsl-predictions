@@ -1,5 +1,40 @@
 {
-  "generated": "2026-03-26",
+  "generated": "2026-03-27",
   "version": "v4.5-sharpened",
-  "fixtures": []
+  "fixtures": [
+    {
+      "league": "Primera División",
+      "time": "00:00",
+      "kickoff_utc": "2026-03-27T00:00:00+00:00",
+      "home": "Argentinos Juniors",
+      "away": "Lanus",
+      "hpos": "–",
+      "apos": "–",
+      "hw": 37.8,
+      "dr": 24.5,
+      "aw": 37.7,
+      "outcome": "Home",
+      "uncertain": true,
+      "conf": 37.8,
+      "gap": 13.3,
+      "score": "2-1",
+      "consensus": "consensus",
+      "data_sig": "Home",
+      "num_sig": "Home",
+      "corners": "5.0 - 5.0",
+      "corners_total": 5.0,
+      "corners_note": "8.5: Over 8 (51.8%)  |  9.5: Under 9 (61.4%)  |  10.5: Under 10 (72.9%)",
+      "btts": 52.0,
+      "home_cs": 40.0,
+      "away_cs": 40.0,
+      "late_goal": 45.0,
+      "penalty": 99.0,
+      "home_comeback": 40.0,
+      "away_comeback": 40.0,
+      "second_leg": false,
+      "leg_context": "",
+      "home_fatigue": 1.0,
+      "away_fatigue": 1.0
+    }
+  ]
 }
