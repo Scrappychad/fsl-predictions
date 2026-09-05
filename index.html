@@ -438,7 +438,7 @@ const LEAGUE_COUNTRY = {
   "World Cup":"International",
 };
 
-function new Date(iso){
+function toUTC(iso){
   // Parse ISO string correctly — handles Z, +00:00, and bare datetime
   if(!iso)return new Date();
   try{return new Date(iso)}catch(e){return new Date()}
@@ -452,8 +452,8 @@ function isUpcoming(d){
   if(!d.kickoff_utc)return true;
   try{
     const kickoff = new Date(d.kickoff_utc);
+    if(isNaN(kickoff.getTime()))return true;
     const now = new Date();
-    // Add 110 min buffer — hide games only after they're likely finished
     return kickoff > new Date(now.getTime() - 110*60*1000);
   }catch(e){return true}
 }
