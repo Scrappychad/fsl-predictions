@@ -306,6 +306,21 @@ body{font-family:var(--sans);background:var(--bg);color:var(--t1);min-height:100
 
 footer{text-align:center;padding:18px 24px;font-size:11px;color:var(--t3);border-top:1px solid var(--line);margin-top:20px}
 
+/* Signal filters */
+.signal-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.sfilt{
+  padding:5px 12px;border-radius:6px;border:1px solid var(--line2);
+  font-size:11px;font-weight:600;color:var(--t2);background:none;cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:5px;
+}
+.sfilt:hover{border-color:var(--line2);color:var(--t1)}
+.sfilt.on-con{background:var(--green-d);border-color:rgba(34,197,94,.3);color:var(--green)}
+.sfilt.on-data{background:var(--amber-d);border-color:rgba(245,158,11,.3);color:var(--amber)}
+.sfilt.on-avd{background:var(--red-d);border-color:rgba(239,68,68,.3);color:var(--red)}
+.sfilt.on-hc{background:var(--blue-d);border-color:rgba(79,142,247,.3);color:var(--blue)}
+.sfilt-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.filter-sep{width:1px;height:20px;background:var(--line2);margin:0 2px;align-self:center}
+
 /* ── MOBILE ── */
 @media(max-width:700px){
   .shell{grid-template-columns:1fr;display:block}
@@ -376,6 +391,13 @@ footer{text-align:center;padding:18px 24px;font-size:11px;color:var(--t3);border
         <div class="page-title">Today's <span>Picks</span></div>
         <div class="page-sub" id="hero-date-line">Loading…</div>
       </div>
+      <div class="signal-filters" id="signal-filters">
+        <button class="sfilt" id="sf-con" onclick="toggleSignal('con')"><span class="sfilt-dot"></span>Consensus</button>
+        <button class="sfilt" id="sf-data" onclick="toggleSignal('data')"><span class="sfilt-dot"></span>Data picks</button>
+        <button class="sfilt" id="sf-avd" onclick="toggleSignal('avd')"><span class="sfilt-dot"></span>Avoid</button>
+        <div class="filter-sep"></div>
+        <button class="sfilt" id="sf-hc" onclick="toggleSignal('hc')"><span class="sfilt-dot"></span>High conf 65%+</button>
+      </div>
       <div class="notice-bar" id="started-notice"></div>
       <div id="cards"><div class="state-msg">Loading predictions…</div></div>
     </div>
@@ -390,7 +412,7 @@ footer{text-align:center;padding:18px 24px;font-size:11px;color:var(--t3);border
 <footer>FSL Predictions · Fredrick Strategy Lab · For informational purposes only</footer>
 
 <script>
-let ALL = [], active = "All";
+let ALL = [], active = "All", sigFilters = new Set();
 const fmt = (n,d=1) => Number(n).toFixed(d);
 
 const LEAGUE_FLAG = {
@@ -400,6 +422,20 @@ const LEAGUE_FLAG = {
   "Brasileirão":"🇧🇷","Süper Lig":"🇹🇷","Scottish Premiership":"🏴󠁧󠁢󠁳󠁣󠁴󠁿",
   "Pro League":"🇧🇪","Super League":"🇨🇭","Super League Greece":"🇬🇷","World Cup":"🌍",
   "EFL Cup":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","FA Cup":"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+  "A-League":"🇦🇺","Austrian Bundesliga":"🇦🇹","Denmark Superliga":"🇩🇰",
+  "Eliteserien":"🇳🇴","Allsvenskan":"🇸🇪","Primera División":"🇦🇷",
+};
+
+const LEAGUE_COUNTRY = {
+  "Premier League":"England","Championship":"England","EFL Cup":"England","FA Cup":"England",
+  "La Liga":"Spain","Bundesliga":"Germany","Serie A":"Italy","Ligue 1":"France",
+  "Eredivisie":"Netherlands","Primeira Liga":"Portugal","Scottish Premiership":"Scotland",
+  "Pro League":"Belgium","Super League":"Switzerland","Super League Greece":"Greece",
+  "Süper Lig":"Turkey","Brasileirão":"Brazil","A-League":"Australia",
+  "Austrian Bundesliga":"Austria","Denmark Superliga":"Denmark",
+  "Eliteserien":"Norway","Allsvenskan":"Sweden","Primera División":"Argentina",
+  "Champions League":"Europe","Europa League":"Europe","Europa Conference League":"Europe",
+  "World Cup":"International",
 };
 
 function toUTC(iso){
@@ -487,7 +523,7 @@ function fatigueBanner(d){
 
 function render(){
   const base=active==="All"?ALL:ALL.filter(d=>d.league===active);
-  const list=base.filter(d=>isUpcoming(d));
+  const list=applySignalFilters(base.filter(d=>isUpcoming(d)));
   const hidden=base.length-list.length;
 
   animateNum(document.getElementById("s-total"),list.length);
@@ -561,7 +597,7 @@ function render(){
       <div class="fc-tz">WAT</div>
     </div>
     <div class="fc-match">
-      <div class="fc-comp">${flag} ${d.league}</div>
+      <div class="fc-comp">${flag} ${d.league}${country?' · <span style="color:var(--t3);font-weight:400">'+country+'</span>':''}</div>
       <div class="fc-teams">
         <span class="fc-team">${d.home}</span>
         <span class="fc-vs">vs</span>
@@ -654,9 +690,39 @@ function tog(i){
   document.getElementById("e"+i).classList.toggle("open");
 }
 
+function toggleSignal(type) {
+  const id = "sf-" + type;
+  const btn = document.getElementById(id);
+  if (sigFilters.has(type)) {
+    sigFilters.delete(type);
+    btn.className = "sfilt";
+  } else {
+    sigFilters.add(type);
+    const clsMap = {con:"on-con", data:"on-data", avd:"on-avd", hc:"on-hc"};
+    btn.className = "sfilt " + (clsMap[type] || "");
+  }
+  render();
+}
+
+function applySignalFilters(list) {
+  if (sigFilters.size === 0) return list;
+  return list.filter(d => {
+    const isCon  = d.consensus === "consensus";
+    const isAvd  = d.consensus === "avoid" || d.conf < 28;
+    const isData = !isCon && !isAvd;
+    const isHC   = d.conf >= 65;
+    let pass = false;
+    if (sigFilters.has("con")  && isCon)  pass = true;
+    if (sigFilters.has("data") && isData) pass = true;
+    if (sigFilters.has("avd")  && isAvd)  pass = true;
+    if (sigFilters.has("hc")   && isHC)   pass = true;
+    return pass;
+  });
+}
+
 function buildFilters(data){
   const leagues=["All",...new Set(data.map(d=>d.league))];
-  const html=leagues.map(l=>`<button class="league-btn${l===active?" on":""}" onclick="setL('${l}')"><span class="league-flag">${LEAGUE_FLAG[l]||"🌐"}</span>${l}</button>`).join("");
+  const html=leagues.map(l=>`<button class="league-btn${l===active?" on":""}" onclick="setL('${l}')"><span class="league-flag">${LEAGUE_FLAG[l]||"🌐"}</span><span>${l}${LEAGUE_COUNTRY[l]&&l!=="All"?'<br><span style="font-size:9px;color:var(--t3);font-weight:400">'+LEAGUE_COUNTRY[l]+'</span>':""}${"</span>"}`).join("");
   document.getElementById("filters").innerHTML=html;
   // mobile
   const mhtml=leagues.map(l=>`<button class="ftag${l===active?" on":""}" onclick="setL('${l}')" style="white-space:nowrap;padding:5px 12px;border-radius:20px;border:1px solid var(--line2);font-size:12px;font-weight:500;color:var(--t2);background:none;cursor:pointer">${LEAGUE_FLAG[l]||"🌐"} ${l}</button>`).join("");
