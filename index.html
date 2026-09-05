@@ -589,6 +589,7 @@ function render(){
       const tags=getTags(d);
       const tagsHtml=tags.map(t=>`<span class="ntag ${t.cls}">${t.t}</span>`).join("");
       const flag=LEAGUE_FLAG[d.league]||"";
+      const country=LEAGUE_COUNTRY[d.league]||"";
 
       html+=`<div class="${cCls}" id="c${i}" style="animation-delay:${i*.03}s">
   <div class="fcard-top" onclick="tog(${i})">
