@@ -402,15 +402,24 @@ const LEAGUE_FLAG = {
   "EFL Cup":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","FA Cup":"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
 };
 
-function toUTC(iso){return new Date(iso.replace(/[+-]\d{2}:\d{2}$/,'').replace(/Z$/,'')+' UTC')}
+function toUTC(iso){
+  // Parse ISO string correctly — handles Z, +00:00, and bare datetime
+  if(!iso)return new Date();
+  try{return new Date(iso)}catch(e){return new Date()}
+}
 function toWAT(d){
   if(!d.kickoff_utc)return d.time||"–";
-  try{return toUTC(d.kickoff_utc).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:"Africa/Lagos"})}
+  try{return new Date(d.kickoff_utc).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:"Africa/Lagos"})}
   catch(e){return d.time||"–"}
 }
 function isUpcoming(d){
   if(!d.kickoff_utc)return true;
-  try{return toUTC(d.kickoff_utc)>new Date()}catch(e){return true}
+  try{
+    const kickoff = new Date(d.kickoff_utc);
+    const now = new Date();
+    // Add 110 min buffer — hide games only after they're likely finished
+    return kickoff > new Date(now.getTime() - 110*60*1000);
+  }catch(e){return true}
 }
 function dayLabel(s){return new Date(s+"T12:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
 function animateNum(el,target){
