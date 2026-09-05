@@ -438,7 +438,7 @@ const LEAGUE_COUNTRY = {
   "World Cup":"International",
 };
 
-function toUTC(iso){
+function new Date(iso){
   // Parse ISO string correctly — handles Z, +00:00, and bare datetime
   if(!iso)return new Date();
   try{return new Date(iso)}catch(e){return new Date()}
