@@ -155,6 +155,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--t1);min-height:100
 .fcard:hover{border-color:var(--line2)}
 .fcard.con{border-left:3px solid var(--green)}
 .fcard.hi{border-left:3px solid var(--blue)}
+.fcard.started{opacity:.55}
+.fcard.started .fc-kick::after{content:" · Live/Done";font-size:9px;color:var(--amber);font-weight:600;letter-spacing:.5px;margin-left:4px}
 @keyframes cardUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* Card top row */
@@ -523,8 +525,8 @@ function fatigueBanner(d){
 
 function render(){
   const base=active==="All"?ALL:ALL.filter(d=>d.league===active);
-  const list=applySignalFilters(base.filter(d=>isUpcoming(d)));
-  const hidden=base.length-list.length;
+  const list=applySignalFilters(base);
+  const started=base.filter(d=>!isUpcoming(d)).length;
 
   animateNum(document.getElementById("s-total"),list.length);
   animateNum(document.getElementById("s-con"),list.filter(d=>d.consensus==="consensus").length);
@@ -532,15 +534,12 @@ function render(){
   animateNum(document.getElementById("s-hc"),list.filter(d=>d.conf>=65).length);
 
   const notice=document.getElementById("started-notice");
-  if(hidden>0){notice.textContent=`${hidden} game${hidden>1?"s":""} already started — hidden`;notice.style.display="block"}
+  if(started>0){notice.textContent=`${started} game${started>1?"s":""} already kicked off`;notice.style.display="block"}
   else{notice.style.display="none"}
 
   const wrap=document.getElementById("cards");
   if(!list.length){
-    const allDone=ALL.length>0&&ALL.every(d=>!isUpcoming(d));
-    wrap.innerHTML=allDone
-      ?`<div class="empty-state"><div class="empty-ball">⚽</div><div class="empty-title">All wrapped up</div><div class="empty-sub">Come back tomorrow for fresh picks</div></div>`
-      :`<div class="state-msg">No fixtures for this selection.</div>`;
+    wrap.innerHTML=`<div class="state-msg">No fixtures for this selection.</div>`;
     return;
   }
 
@@ -578,7 +577,8 @@ function render(){
       const isSpl=!isCon&&!isAvd;
       const bCls=isCon?"con":isAvd?"avd":"data";
       const bTxt=isCon?"Consensus":isAvd?"Avoid":"Data";
-      const cCls="fcard"+(isCon?" con":d.conf>=65?" hi":"");
+      const hasStarted = !isUpcoming(d);
+      const cCls="fcard"+(isCon?" con":d.conf>=65?" hi":"")+(hasStarted?" started":"");
       const outFl=d.outcome+(d.uncertain?" ?":"");
       const oCls=outCls(d.outcome);
       const sigM=isCon?`Data & Num: ${d.data_sig}`:`D: ${d.data_sig} / N: ${d.num_sig}`;
