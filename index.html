@@ -398,7 +398,7 @@ footer{text-align:center;padding:18px 24px;font-size:11px;color:var(--t3);border
         <button class="sfilt" id="sf-data" onclick="toggleSignal('data')"><span class="sfilt-dot"></span>Data picks</button>
         <button class="sfilt" id="sf-avd" onclick="toggleSignal('avd')"><span class="sfilt-dot"></span>Avoid</button>
         <div class="filter-sep"></div>
-        <button class="sfilt" id="sf-hc" onclick="toggleSignal('hc')"><span class="sfilt-dot"></span>High conf 65%+</button>
+        <button class="sfilt" id="sf-hc" onclick="toggleSignal('hc')"><span class="sfilt-dot"></span>High conf 70%+</button>
       </div>
       <div class="notice-bar" id="started-notice"></div>
       <div id="cards"><div class="state-msg">Loading predictions…</div></div>
@@ -531,7 +531,7 @@ function render(){
   animateNum(document.getElementById("s-total"),list.length);
   animateNum(document.getElementById("s-con"),list.filter(d=>d.consensus==="consensus").length);
   animateNum(document.getElementById("s-spl"),list.filter(d=>d.consensus==="data").length);
-  animateNum(document.getElementById("s-hc"),list.filter(d=>d.conf>=65).length);
+  animateNum(document.getElementById("s-hc"),list.filter(d=>d.conf>=70).length);
 
   const notice=document.getElementById("started-notice");
   if(started>0){notice.textContent=`${started} game${started>1?"s":""} already kicked off`;notice.style.display="block"}
@@ -578,7 +578,7 @@ function render(){
       const bCls=isCon?"con":isAvd?"avd":"data";
       const bTxt=isCon?"Consensus":isAvd?"Avoid":"Data";
       const hasStarted = !isUpcoming(d);
-      const cCls="fcard"+(isCon?" con":d.conf>=65?" hi":"")+(hasStarted?" started":"");
+      const cCls="fcard"+(isCon?" con":d.conf>=70?" hi":"")+(hasStarted?" started":"");
       const outFl=d.outcome+(d.uncertain?" ?":"");
       const oCls=outCls(d.outcome);
       const sigM=isCon?`Data & Num: ${d.data_sig}`:`D: ${d.data_sig} / N: ${d.num_sig}`;
@@ -711,7 +711,7 @@ function applySignalFilters(list) {
     const isCon  = d.consensus === "consensus";
     const isAvd  = d.consensus === "avoid" || d.conf < 28;
     const isData = !isCon && !isAvd;
-    const isHC   = d.conf >= 65;
+    const isHC   = d.conf >= 70;  // v4.9: raised threshold
     let pass = false;
     if (sigFilters.has("con")  && isCon)  pass = true;
     if (sigFilters.has("data") && isData) pass = true;
