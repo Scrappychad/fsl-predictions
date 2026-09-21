@@ -308,6 +308,64 @@ body{font-family:var(--sans);background:var(--bg);color:var(--t1);min-height:100
 
 footer{text-align:center;padding:18px 24px;font-size:11px;color:var(--t3);border-top:1px solid var(--line);margin-top:20px}
 
+/* Best bet tag */
+.best-bet{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 10px;border-radius:6px;
+  font-size:11px;font-weight:700;letter-spacing:.3px;
+  background:linear-gradient(135deg,rgba(79,142,247,.2),rgba(34,197,94,.15));
+  border:1px solid rgba(79,142,247,.3);color:var(--blue);
+  margin-top:4px;
+}
+.best-bet::before{content:"★";font-size:9px}
+
+/* Results tab */
+.res-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.res-refresh-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:8px;
+  border:1px solid var(--line2);background:none;
+  color:var(--t2);font-size:12px;font-weight:500;cursor:pointer;
+  transition:all .15s;font-family:var(--sans);
+}
+.res-refresh-btn:hover{background:var(--card2);color:var(--t1)}
+.res-refresh-btn.loading{opacity:.5;pointer-events:none}
+.res-summary{
+  display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;
+}
+.res-sum-chip{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:10px 16px;text-align:center;min-width:80px;
+}
+.res-sum-num{font-size:20px;font-weight:700;font-family:var(--mono);display:block}
+.res-sum-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-top:2px;display:block}
+.res-card{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);margin-bottom:6px;overflow:hidden;
+}
+.res-card.correct{border-left:3px solid var(--green)}
+.res-card.wrong{border-left:3px solid var(--red)}
+.res-card.pending{border-left:3px solid var(--t3);opacity:.6}
+.res-card-inner{
+  display:grid;grid-template-columns:72px 1fr 110px 110px 36px;
+  align-items:center;gap:12px;padding:13px 14px;
+}
+.rc-time{text-align:center}
+.rc-kick{font-size:15px;font-weight:700;font-family:var(--mono);color:var(--t1)}
+.rc-tz{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+.rc-match{}
+.rc-comp{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.rc-teams{font-size:14px;font-weight:600;color:var(--t1)}
+.rc-pred,.rc-actual{text-align:center}
+.rc-lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.rc-out{font-size:13px;font-weight:700;font-family:var(--mono)}
+.rc-score{font-size:11px;color:var(--t3);font-family:var(--mono);margin-top:2px}
+.rc-icon{text-align:center;font-size:18px}
+.rc-pending{font-size:11px;color:var(--t3);font-style:italic}
+
 /* Signal filters */
 .signal-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
 .sfilt{
@@ -405,8 +463,25 @@ footer{text-align:center;padding:18px 24px;font-size:11px;color:var(--t3);border
     </div>
 
     <div id="results-panel" style="display:none">
-      <div class="page-hdr"><div class="page-title">Results</div></div>
-      <div id="results-content"><div class="state-msg">Loading results…</div></div>
+      <div class="page-hdr">
+        <div class="page-title">Results</div>
+        <div class="res-hdr">
+          <div class="page-sub" id="results-date-line">Today's games</div>
+          <button class="res-refresh-btn" id="refresh-btn" onclick="refreshResults()">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M10 6A4 4 0 1 1 6 2a4 4 0 0 1 2.83 1.17L11 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+      <div class="res-summary" id="res-summary" style="display:none">
+        <div class="res-sum-chip"><span class="res-sum-num green" id="rs-correct">0</span><span class="res-sum-lbl">Correct</span></div>
+        <div class="res-sum-chip"><span class="res-sum-num red" id="rs-wrong">0</span><span class="res-sum-lbl">Wrong</span></div>
+        <div class="res-sum-chip"><span class="res-sum-num" id="rs-pending">0</span><span class="res-sum-lbl">Pending</span></div>
+        <div class="res-sum-chip"><span class="res-sum-num blue" id="rs-acc">–</span><span class="res-sum-lbl">Accuracy</span></div>
+      </div>
+      <div id="results-content"><div class="state-msg">Click refresh to load today's results.</div></div>
     </div>
   </main>
 </div>
@@ -588,6 +663,8 @@ function render(){
       const commentCls=isCon?"con":"spl";
       const tags=getTags(d);
       const tagsHtml=tags.map(t=>`<span class="ntag ${t.cls}">${t.t}</span>`).join("");
+      const bestBet=getBestBet(d);
+      const bestBetHtml=`<div class="best-bet">${bestBet}</div>`;
       const flag=LEAGUE_FLAG[d.league]||"";
       const country=LEAGUE_COUNTRY[d.league]||"";
 
@@ -608,6 +685,7 @@ function render(){
     </div>
     <div class="fc-tags">
       <div class="signal-badge ${bCls}">${bTxt}</div>
+      ${bestBetHtml}
       <div class="ntag-row">${tagsHtml}</div>
     </div>
     <div class="fc-verdict">
@@ -747,52 +825,196 @@ async function load(){
   }
 }
 
-let RESULTS=null;
+// ── Best bet logic ──
+function getBestBet(d) {
+  const out = (d.outcome||"").toLowerCase().replace(" ?","").replace(" (uncertain)","").trim();
+  const conf = d.conf || 0;
+  const btts = d.btts || 0;
+  const homecs = d.home_cs || 0;
+  const awaycs = d.away_cs || 0;
+  const sc = d.score || "0-0";
+  const [sh, sa] = sc.split("-").map(Number);
+  const tot = (sh||0)+(sa||0);
+  const hw = d.hw || 0;
+  const aw_pct = d.aw || 0;
+  const dr = d.dr || 0;
+
+  // Priority 1: High confidence outcome (70%+)
+  if (conf >= 70) {
+    if (out.includes("home"))      return "Home Win";
+    if (out.includes("away"))      return "Away Win";
+    if (out.includes("draw"))      return "Draw";
+  }
+
+  // Priority 2: Strong BTTS signal
+  if (btts >= 65) return "BTTS Yes";
+  if (btts <= 25) return "BTTS No";
+
+  // Priority 3: Goals market from projected score
+  if (tot >= 3)      return "Over 2.5 Goals";
+  if (tot >= 2)      return "Over 1.5 Goals";
+  if (tot <= 1)      return "Under 1.5 Goals";
+
+  // Priority 4: Clean sheet market
+  if (homecs >= 50)  return "Home Clean Sheet";
+  if (awaycs >= 50)  return "Away Clean Sheet";
+
+  // Priority 5: Moderate confidence outcome
+  if (conf >= 55) {
+    if (out.includes("home")) return "Home Win";
+    if (out.includes("away")) return "Away Win";
+    if (out.includes("draw")) return "Draw";
+  }
+
+  // Fallback
+  if (hw >= aw_pct && hw >= dr)      return "Home Win";
+  if (aw_pct >= hw && aw_pct >= dr)  return "Away Win";
+  return "Draw";
+}
+
 function switchTab(t){
   document.getElementById("tab-upcoming").classList.toggle("on",t==="upcoming");
   document.getElementById("tab-results").classList.toggle("on",t==="results");
   document.getElementById("upcoming-panel").style.display=t==="upcoming"?"":"none";
   document.getElementById("results-panel").style.display=t==="results"?"":"none";
-  if(t==="results"&&!RESULTS)loadResults();
 }
 
-function renderResults(data){
-  const wrap=document.getElementById("results-content");
-  const sessions=data.sessions||[];
-  if(!sessions.length){
-    wrap.innerHTML=`<div class="empty-state"><div class="empty-ball">⚽</div><div class="empty-title">No results yet</div><div class="empty-sub">Check back after today's games</div></div>`;
+// ── Live results from football-data.org via predictions match ──
+async function refreshResults() {
+  const btn = document.getElementById("refresh-btn");
+  btn.classList.add("loading");
+  btn.textContent = "Loading…";
+
+  try {
+    // Fetch today's finished games from predictions JSON
+    // and check their status via football-data.org
+    const res = await fetch("predictions.json?t=" + Date.now());
+    const json = await res.json();
+    const fixtures = json.fixtures || [];
+
+    // Fetch results from football-data.org for finished games
+    const today = new Date().toISOString().slice(0,10);
+    const fdRes = await fetch(
+      `https://api.football-data.org/v4/matches?dateFrom=${today}&dateTo=${today}&status=FINISHED`,
+      { headers: { "X-Auth-Token": "2cd936116aae4186a7cb95d0d2ff6cf4" } }
+    );
+    const fdData = await fdRes.json();
+    const finished = fdData.matches || [];
+
+    // Match finished games against predictions
+    const results = [];
+    fixtures.forEach(fix => {
+      const match = finished.find(m =>
+        (m.homeTeam.name.toLowerCase().includes(fix.home.toLowerCase().split(" ")[0]) ||
+         fix.home.toLowerCase().includes(m.homeTeam.name.toLowerCase().split(" ")[0])) &&
+        (m.awayTeam.name.toLowerCase().includes(fix.away.toLowerCase().split(" ")[0]) ||
+         fix.away.toLowerCase().includes(m.awayTeam.name.toLowerCase().split(" ")[0]))
+      );
+
+      if (match) {
+        const hg = match.score.fullTime.home;
+        const ag = match.score.fullTime.away;
+        const actual = hg > ag ? "Home" : ag > hg ? "Away" : "Draw";
+        const predicted = fix.outcome.replace(" ?","").replace(" (Uncertain)","").trim();
+        const predSimple = predicted.toLowerCase().includes("home") ? "Home"
+                         : predicted.toLowerCase().includes("away") ? "Away" : "Draw";
+        results.push({
+          fix, match,
+          hg, ag,
+          actual,
+          predicted: predSimple,
+          correct: actual === predSimple,
+          status: "finished"
+        });
+      } else {
+        results.push({ fix, status: "pending" });
+      }
+    });
+
+    renderLiveResults(results);
+
+  } catch(e) {
+    document.getElementById("results-content").innerHTML =
+      `<div class="state-msg">Could not load results. Check connection.</div>`;
+  } finally {
+    btn.classList.remove("loading");
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M10 6A4 4 0 1 1 6 2a4 4 0 0 1 2.83 1.17L11 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+    </svg> Refresh`;
+  }
+}
+
+function renderLiveResults(results) {
+  const wrap = document.getElementById("results-content");
+  const summary = document.getElementById("res-summary");
+
+  const finished = results.filter(r => r.status === "finished");
+  const pending  = results.filter(r => r.status === "pending");
+  const correct  = finished.filter(r => r.correct);
+  const wrong    = finished.filter(r => !r.correct);
+  const acc      = finished.length > 0 ? Math.round(correct.length/finished.length*100) : 0;
+
+  // Update summary chips
+  document.getElementById("rs-correct").textContent = correct.length;
+  document.getElementById("rs-wrong").textContent   = wrong.length;
+  document.getElementById("rs-pending").textContent = pending.length;
+  document.getElementById("rs-acc").textContent     = finished.length > 0 ? acc+"%" : "–";
+  summary.style.display = "flex";
+
+  if (!results.length) {
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-ball">⚽</div><div class="empty-title">No games today</div></div>`;
     return;
   }
-  wrap.innerHTML=sessions.map(s=>{
-    const pct=s.pct||0;
-    const pCls=pct>=55?"good":pct>=35?"mid":"low";
-    const rows=(s.games||[]).map(g=>{
-      const pCol=g.predicted==="Home"?"var(--blue)":g.predicted==="Away"?"var(--red)":"var(--t3)";
-      const aCol=g.actual_outcome==="Home"?"var(--blue)":g.actual_outcome==="Away"?"var(--red)":"var(--t3)";
-      return`<div class="res-row">
-        <div class="res-league">${LEAGUE_FLAG[g.league]||""} ${g.league}</div>
-        <div><div class="res-matchup">${g.home} vs ${g.away}</div><div class="res-positions">Home ${g.hpos} · Away ${g.apos}</div></div>
-        <div class="res-pred"><div class="res-pred-out" style="color:${pCol}">${g.predicted}</div><div class="res-pred-score">${g.predicted_score}</div></div>
-        <div class="res-actual"><div class="res-actual-out" style="color:${aCol}">${g.actual_outcome}</div><div class="res-actual-score">${g.actual_score}</div></div>
-        <div style="text-align:center;font-size:15px">${g.correct?"✅":"❌"}</div>
+
+  wrap.innerHTML = results.map(r => {
+    if (r.status === "pending") {
+      const ktime = toWAT(r.fix);
+      return `<div class="res-card pending">
+        <div class="res-card-inner">
+          <div class="rc-time"><div class="rc-kick">${ktime}</div><div class="rc-tz">WAT</div></div>
+          <div class="rc-match">
+            <div class="rc-comp">${LEAGUE_FLAG[r.fix.league]||""} ${r.fix.league}</div>
+            <div class="rc-teams">${r.fix.home} vs ${r.fix.away}</div>
+          </div>
+          <div class="rc-pred">
+            <div class="rc-lbl">Predicted</div>
+            <div class="rc-out" style="color:var(--blue)">${r.fix.outcome}</div>
+            <div class="rc-score">${r.fix.score}</div>
+          </div>
+          <div class="rc-actual"><div class="rc-pending">Not started</div></div>
+          <div class="rc-icon">⏳</div>
+        </div>
       </div>`;
-    }).join("");
-    return`<div class="session-block"><div class="session-hdr"><div class="session-date">${s.date}</div><div class="session-acc"><span class="acc-frac">${s.correct}/${s.total}</span><span class="acc-pct ${pCls}">${pct}%</span></div></div>${rows}</div>`;
+    }
+
+    const pCol = r.predicted==="Home"?"var(--blue)":r.predicted==="Away"?"var(--red)":"var(--t2)";
+    const aCol = r.actual==="Home"?"var(--blue)":r.actual==="Away"?"var(--red)":"var(--t2)";
+    const ktime = toWAT(r.fix);
+
+    return `<div class="res-card ${r.correct?"correct":"wrong"}">
+      <div class="res-card-inner">
+        <div class="rc-time"><div class="rc-kick">${ktime}</div><div class="rc-tz">WAT</div></div>
+        <div class="rc-match">
+          <div class="rc-comp">${LEAGUE_FLAG[r.fix.league]||""} ${r.fix.league}</div>
+          <div class="rc-teams">${r.fix.home} vs ${r.fix.away}</div>
+        </div>
+        <div class="rc-pred">
+          <div class="rc-lbl">Predicted</div>
+          <div class="rc-out" style="color:${pCol}">${r.predicted}</div>
+          <div class="rc-score">${r.fix.score}</div>
+        </div>
+        <div class="rc-actual">
+          <div class="rc-lbl">Actual</div>
+          <div class="rc-out" style="color:${aCol}">${r.actual}</div>
+          <div class="rc-score">${r.hg}-${r.ag}</div>
+        </div>
+        <div class="rc-icon">${r.correct?"✅":"❌"}</div>
+      </div>
+    </div>`;
   }).join("");
 }
 
-async function loadResults(){
-  try{
-    const r=await fetch("results.json?t="+Date.now());
-    RESULTS=await r.json();
-    renderResults(RESULTS);
-  }catch(e){
-    document.getElementById("results-content").innerHTML='<div class="state-msg">No results yet.</div>';
-  }
-}
-
 load();
-setInterval(()=>{if(ALL.length)render()},60000);
 </script>
 </body>
 </html>
