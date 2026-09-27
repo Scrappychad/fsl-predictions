@@ -493,26 +493,28 @@ let ALL = [], active = "All", sigFilters = new Set();
 const fmt = (n,d=1) => Number(n).toFixed(d);
 
 const LEAGUE_FLAG = {
-  "Premier League":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","Championship":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","La Liga":"🇪🇸","Bundesliga":"🇩🇪",
-  "Serie A":"🇮🇹","Ligue 1":"🇫🇷","Eredivisie":"🇳🇱","Primeira Liga":"🇵🇹",
+  // Club
+  "Premier League":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","Championship":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","EFL Cup":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","FA Cup":"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+  "La Liga":"🇪🇸","Bundesliga":"🇩🇪","Serie A":"🇮🇹","Ligue 1":"🇫🇷",
+  "Eredivisie":"🇳🇱","Primeira Liga":"🇵🇹",
   "Champions League":"🏆","Europa League":"🏆","Europa Conference League":"🏆",
-  "Brasileirão":"🇧🇷","Süper Lig":"🇹🇷","Scottish Premiership":"🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-  "Pro League":"🇧🇪","Super League":"🇨🇭","Super League Greece":"🇬🇷","World Cup":"🌍",
-  "EFL Cup":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","FA Cup":"🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-  "A-League":"🇦🇺","Austrian Bundesliga":"🇦🇹","Denmark Superliga":"🇩🇰",
-  "Eliteserien":"🇳🇴","Allsvenskan":"🇸🇪","Primera División":"🇦🇷",
+  // International
+  "World Cup":"🌍","European Championship":"🇪🇺","UEFA Nations League":"🇪🇺",
+  "Copa America":"🌎","African Cup of Nations":"🌍","AFC Asian Cup":"🌏",
+  "CONMEBOL Qualifiers":"🌎","Friendlies":"🤝",
 };
 
 const LEAGUE_COUNTRY = {
+  // Club
   "Premier League":"England","Championship":"England","EFL Cup":"England","FA Cup":"England",
   "La Liga":"Spain","Bundesliga":"Germany","Serie A":"Italy","Ligue 1":"France",
-  "Eredivisie":"Netherlands","Primeira Liga":"Portugal","Scottish Premiership":"Scotland",
-  "Pro League":"Belgium","Super League":"Switzerland","Super League Greece":"Greece",
-  "Süper Lig":"Turkey","Brasileirão":"Brazil","A-League":"Australia",
-  "Austrian Bundesliga":"Austria","Denmark Superliga":"Denmark",
-  "Eliteserien":"Norway","Allsvenskan":"Sweden","Primera División":"Argentina",
+  "Eredivisie":"Netherlands","Primeira Liga":"Portugal",
   "Champions League":"Europe","Europa League":"Europe","Europa Conference League":"Europe",
-  "World Cup":"International",
+  // International
+  "World Cup":"International","European Championship":"International",
+  "UEFA Nations League":"International","Copa America":"International",
+  "African Cup of Nations":"International","AFC Asian Cup":"International",
+  "CONMEBOL Qualifiers":"International","Friendlies":"International",
 };
 
 function toUTC(iso){
@@ -879,63 +881,20 @@ function switchTab(t){
   document.getElementById("results-panel").style.display=t==="results"?"":"none";
 }
 
-// ── Live results from football-data.org via predictions match ──
+// ── Results — reads from results.json pushed by Colab ──
 async function refreshResults() {
   const btn = document.getElementById("refresh-btn");
   btn.classList.add("loading");
-  btn.textContent = "Loading…";
+  btn.innerHTML = "Loading…";
 
   try {
-    // Fetch today's finished games from predictions JSON
-    // and check their status via football-data.org
-    const res = await fetch("predictions.json?t=" + Date.now());
-    const json = await res.json();
-    const fixtures = json.fixtures || [];
-
-    // Fetch results from football-data.org for finished games
-    const today = new Date().toISOString().slice(0,10);
-    const fdRes = await fetch(
-      `https://api.football-data.org/v4/matches?dateFrom=${today}&dateTo=${today}&status=FINISHED`,
-      { headers: { "X-Auth-Token": "2cd936116aae4186a7cb95d0d2ff6cf4" } }
-    );
-    const fdData = await fdRes.json();
-    const finished = fdData.matches || [];
-
-    // Match finished games against predictions
-    const results = [];
-    fixtures.forEach(fix => {
-      const match = finished.find(m =>
-        (m.homeTeam.name.toLowerCase().includes(fix.home.toLowerCase().split(" ")[0]) ||
-         fix.home.toLowerCase().includes(m.homeTeam.name.toLowerCase().split(" ")[0])) &&
-        (m.awayTeam.name.toLowerCase().includes(fix.away.toLowerCase().split(" ")[0]) ||
-         fix.away.toLowerCase().includes(m.awayTeam.name.toLowerCase().split(" ")[0]))
-      );
-
-      if (match) {
-        const hg = match.score.fullTime.home;
-        const ag = match.score.fullTime.away;
-        const actual = hg > ag ? "Home" : ag > hg ? "Away" : "Draw";
-        const predicted = fix.outcome.replace(" ?","").replace(" (Uncertain)","").trim();
-        const predSimple = predicted.toLowerCase().includes("home") ? "Home"
-                         : predicted.toLowerCase().includes("away") ? "Away" : "Draw";
-        results.push({
-          fix, match,
-          hg, ag,
-          actual,
-          predicted: predSimple,
-          correct: actual === predSimple,
-          status: "finished"
-        });
-      } else {
-        results.push({ fix, status: "pending" });
-      }
-    });
-
-    renderLiveResults(results);
-
+    const r = await fetch("results.json?t=" + Date.now());
+    if (!r.ok) throw new Error("results.json not found");
+    const data = await r.json();
+    renderLiveResults(data.results || [], data.summary || {});
   } catch(e) {
     document.getElementById("results-content").innerHTML =
-      `<div class="state-msg">Could not load results. Check connection.</div>`;
+      `<div class="state-msg">No results yet — run the Colab export block after games finish.</div>`;
   } finally {
     btn.classList.remove("loading");
     btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -944,7 +903,7 @@ async function refreshResults() {
   }
 }
 
-function renderLiveResults(results) {
+function renderLiveResults(results, summary={}) {
   const wrap = document.getElementById("results-content");
   const summary = document.getElementById("res-summary");
 
@@ -952,14 +911,14 @@ function renderLiveResults(results) {
   const pending  = results.filter(r => r.status === "pending");
   const correct  = finished.filter(r => r.correct);
   const wrong    = finished.filter(r => !r.correct);
-  const acc      = finished.length > 0 ? Math.round(correct.length/finished.length*100) : 0;
+  const acc      = summary.accuracy || (finished.length > 0 ? Math.round(correct.length/finished.length*100) : 0);
 
   // Update summary chips
-  document.getElementById("rs-correct").textContent = correct.length;
-  document.getElementById("rs-wrong").textContent   = wrong.length;
-  document.getElementById("rs-pending").textContent = pending.length;
+  document.getElementById("rs-correct").textContent = summary.correct  !== undefined ? summary.correct  : correct.length;
+  document.getElementById("rs-wrong").textContent   = summary.wrong    !== undefined ? summary.wrong    : wrong.length;
+  document.getElementById("rs-pending").textContent = summary.pending  !== undefined ? summary.pending  : pending.length;
   document.getElementById("rs-acc").textContent     = finished.length > 0 ? acc+"%" : "–";
-  summary.style.display = "flex";
+  document.getElementById("res-summary").style.display = "flex";
 
   if (!results.length) {
     wrap.innerHTML = `<div class="empty-state"><div class="empty-ball">⚽</div><div class="empty-title">No games today</div></div>`;
@@ -968,18 +927,18 @@ function renderLiveResults(results) {
 
   wrap.innerHTML = results.map(r => {
     if (r.status === "pending") {
-      const ktime = toWAT(r.fix);
+      const ktime = toWAT(r);
       return `<div class="res-card pending">
         <div class="res-card-inner">
           <div class="rc-time"><div class="rc-kick">${ktime}</div><div class="rc-tz">WAT</div></div>
           <div class="rc-match">
-            <div class="rc-comp">${LEAGUE_FLAG[r.fix.league]||""} ${r.fix.league}</div>
-            <div class="rc-teams">${r.fix.home} vs ${r.fix.away}</div>
+            <div class="rc-comp">${LEAGUE_FLAG[r.league]||""} ${r.league}</div>
+            <div class="rc-teams">${r.home} vs ${r.away}</div>
           </div>
           <div class="rc-pred">
             <div class="rc-lbl">Predicted</div>
-            <div class="rc-out" style="color:var(--blue)">${r.fix.outcome}</div>
-            <div class="rc-score">${r.fix.score}</div>
+            <div class="rc-out" style="color:var(--blue)">${r.outcome||"–"}</div>
+            <div class="rc-score">${r.score||"–"}</div>
           </div>
           <div class="rc-actual"><div class="rc-pending">Not started</div></div>
           <div class="rc-icon">⏳</div>
@@ -995,13 +954,13 @@ function renderLiveResults(results) {
       <div class="res-card-inner">
         <div class="rc-time"><div class="rc-kick">${ktime}</div><div class="rc-tz">WAT</div></div>
         <div class="rc-match">
-          <div class="rc-comp">${LEAGUE_FLAG[r.fix.league]||""} ${r.fix.league}</div>
-          <div class="rc-teams">${r.fix.home} vs ${r.fix.away}</div>
+          <div class="rc-comp">${LEAGUE_FLAG[r.league]||""} ${r.league}</div>
+          <div class="rc-teams">${r.home} vs ${r.away}</div>
         </div>
         <div class="rc-pred">
           <div class="rc-lbl">Predicted</div>
           <div class="rc-out" style="color:${pCol}">${r.predicted}</div>
-          <div class="rc-score">${r.fix.score}</div>
+          <div class="rc-score">${r.score||"–"}</div>
         </div>
         <div class="rc-actual">
           <div class="rc-lbl">Actual</div>
