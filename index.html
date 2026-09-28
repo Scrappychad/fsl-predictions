@@ -905,7 +905,7 @@ async function refreshResults() {
 
 function renderLiveResults(results, summary={}) {
   const wrap = document.getElementById("results-content");
-  const summary = document.getElementById("res-summary");
+  const summaryEl = document.getElementById("res-summary");
 
   const finished = results.filter(r => r.status === "finished");
   const pending  = results.filter(r => r.status === "pending");
@@ -918,6 +918,7 @@ function renderLiveResults(results, summary={}) {
   document.getElementById("rs-wrong").textContent   = summary.wrong    !== undefined ? summary.wrong    : wrong.length;
   document.getElementById("rs-pending").textContent = summary.pending  !== undefined ? summary.pending  : pending.length;
   document.getElementById("rs-acc").textContent     = finished.length > 0 ? acc+"%" : "–";
+  document.getElementById("res-summary").style.display = "flex";
   document.getElementById("res-summary").style.display = "flex";
 
   if (!results.length) {
