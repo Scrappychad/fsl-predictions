@@ -381,61 +381,121 @@ footer{text-align:center;padding:18px 24px;font-size:11px;color:var(--t3);border
 .sfilt-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
 .filter-sep{width:1px;height:20px;background:var(--line2);margin:0 2px;align-self:center}
 
-/* ── MOBILE ── */
+/* ── MOBILE LIVESCORE STYLE ── */
+.mobile-verdict{display:none}
+.mobile-filter{display:none}
+.mob-teams{display:none}
+.mob-pred{display:none}
+
 @media(max-width:700px){
   .shell{grid-template-columns:1fr;display:block}
   .sidebar{display:none}
-
-  /* Consistent 16px gutter on all sides */
-  .content{padding:20px 16px 32px}
+  .content{padding:0 0 40px}
 
   /* Page header */
-  .page-hdr{margin-bottom:18px}
+  .page-hdr{padding:20px 16px 12px;margin-bottom:0}
   .page-title{font-size:20px}
 
-  /* Signal filters — scroll horizontally, stay within gutter */
-  .signal-filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-bottom:12px}
+  /* Signal filters — horizontal scroll strip */
+  .signal-filters{
+    flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
+    padding:0 16px 12px;margin-bottom:0;gap:6px;
+  }
   .signal-filters::-webkit-scrollbar{display:none}
 
-  /* Card top row: time | teams | chevron — no hidden columns */
+  /* Notice bar */
+  .notice-bar{margin:0 16px 12px}
+
+  /* Day header */
+  .day-hdr{padding:14px 16px 6px}
+
+  /* ── LIVESCORE ROW — hide old grid, show new layout ── */
+  .fcard{border-radius:0;margin-bottom:0;border-left:none;border-right:none;border-top:none}
+  .fcard:first-of-type,.day-group:first-child .fcard:first-child{border-top:1px solid var(--line)}
+  .fcard.con{border-left:none;border-bottom:1px solid var(--line)}
+  .fcard.hi{border-left:none}
+
+  /* Accent stripe — left edge via box-shadow so it doesn't affect layout */
+  .fcard.con .fcard-top{box-shadow:inset 3px 0 0 var(--green)}
+  .fcard.hi .fcard-top{box-shadow:inset 3px 0 0 var(--blue)}
+
+  /* Override desktop grid */
   .fcard-top{
-    grid-template-columns:56px 1fr 28px;
-    gap:10px;
-    padding:13px 14px;
+    display:flex;
+    align-items:center;
+    gap:0;
+    padding:13px 14px 13px 16px;
   }
-  .fc-tags,.fc-verdict{display:none}
 
-  /* Mobile verdict row replaces the hidden verdict column */
-  .mobile-verdict{display:flex!important;align-items:center;gap:8px;padding:0 14px 13px}
+  /* Hide desktop-only columns */
+  .fc-tags{display:none}
+  .fc-verdict{display:none}
+  .fc-chev{display:none}
+  .fc-teams{display:none}
+  .fc-pos{display:none}
 
-  /* Expand panel inner layout — single column */
+  /* Show mobile-only elements */
+  .mob-teams{display:flex}
+  .mob-pred{display:flex}
+
+  /* Time — fixed width, left */
+  .fc-time{
+    flex-shrink:0;width:48px;text-align:left;margin-right:12px;
+  }
+  .fc-kick{font-size:15px}
+  .fc-tz{font-size:9px}
+
+  /* Teams block — takes remaining space */
+  .fc-match{flex:1;min-width:0}
+  .fc-comp{font-size:9px;margin-bottom:4px}
+
+  /* Stack home and away on separate lines like LiveScore */
+  .fc-teams{display:none} /* hide old inline layout */
+  .fc-pos{display:none}
+
+  /* Mobile prediction badge — right side */
+  .mob-pred{
+    flex-shrink:0;
+    display:flex;flex-direction:column;align-items:flex-end;gap:4px;
+    margin-left:10px;
+  }
+  .mob-pred-pill{
+    font-size:11px;font-weight:700;
+    padding:4px 10px;border-radius:6px;letter-spacing:.2px;white-space:nowrap;
+  }
+  .mob-pred-pill.home{background:var(--blue-d);color:var(--blue)}
+  .mob-pred-pill.away{background:var(--red-d);color:var(--red)}
+  .mob-pred-pill.draw{background:rgba(255,255,255,.06);color:var(--t2);border:1px solid var(--line2)}
+  .mob-sig{
+    font-size:9px;font-weight:600;letter-spacing:.3px;
+    display:flex;align-items:center;gap:3px;
+  }
+  .mob-sig::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0}
+  .mob-sig.con{color:var(--green)}
+  .mob-sig.data{color:var(--amber)}
+  .mob-sig.avd{color:var(--red)}
+
+  /* Mobile team stack */
+  .mob-teams{display:flex;flex-direction:column;gap:5px}
+  .mob-team-row{display:flex;align-items:center;gap:8px}
+  .mob-team-name{font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+  .mob-team-pos{font-size:10px;color:var(--t3)}
+
+  /* Expand panel — full width, no gutter gap */
+  .expand-body{padding:16px}
   .exp-row{grid-template-columns:1fr}
   .sig-grid{grid-template-columns:1fr 1fr}
   .detail-row{grid-template-columns:1fr 1fr}
   .ev-grid{grid-template-columns:1fr 1fr}
 
-  /* Results card */
-  .res-card-inner{
-    grid-template-columns:56px 1fr 90px 90px 28px;
-    gap:8px;
-    padding:12px 14px;
-  }
-
-  /* Summary chips — even row */
-  .res-summary{gap:6px}
+  /* Results panel */
+  .res-hdr{flex-direction:column;align-items:flex-start;gap:8px;padding:0 16px}
+  .page-hdr .res-hdr{padding:0}
+  .res-summary{gap:6px;padding:0 16px 12px}
   .res-sum-chip{flex:1;min-width:0;padding:10px 8px}
+  #results-content{padding:0 16px}
 
-  /* Results header */
-  .res-hdr{flex-direction:column;align-items:flex-start;gap:8px}
-
-  /* Footer breathing room */
-  footer{padding:16px}
-}
-
-.mobile-verdict{display:none}
-.mobile-filter{display:none}
-
-@media(max-width:700px){
+  /* Mobile filter strip */
   .mobile-filter{
     display:flex;overflow-x:auto;gap:6px;
     padding:10px 16px;
@@ -443,6 +503,8 @@ footer{text-align:center;padding:18px 24px;font-size:11px;color:var(--t3);border
     scrollbar-width:none;
   }
   .mobile-filter::-webkit-scrollbar{display:none}
+
+  footer{padding:16px}
 }
 </style>
 </head>
@@ -728,6 +790,22 @@ function render(){
         <span class="fc-team">${d.away}</span>
       </div>
       <div class="fc-pos">Home ${d.hpos} · Away ${d.apos}</div>
+      <!-- Mobile: stacked team rows (LiveScore style) -->
+      <div class="mob-teams">
+        <div class="mob-team-row">
+          <span class="mob-team-name">${d.home}</span>
+          <span class="mob-team-pos">${d.hpos !== '–' ? d.hpos : ''}</span>
+        </div>
+        <div class="mob-team-row">
+          <span class="mob-team-name">${d.away}</span>
+          <span class="mob-team-pos">${d.apos !== '–' ? d.apos : ''}</span>
+        </div>
+      </div>
+    </div>
+    <!-- Mobile: prediction badge (right side, always visible) -->
+    <div class="mob-pred">
+      <div class="mob-pred-pill ${oCls}">${outFl}</div>
+      <div class="mob-sig ${bCls}">${bTxt}</div>
     </div>
     <div class="fc-tags">
       <div class="signal-badge ${bCls}">${bTxt}</div>
@@ -745,11 +823,6 @@ function render(){
         <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
-  </div>
-  <div class="mobile-verdict">
-    <div class="verdict-pill ${oCls}">${outFl}</div>
-    <div class="signal-badge ${bCls}" style="font-size:10px">${bTxt}</div>
-    <div class="ntag-row">${tagsHtml}</div>
   </div>
   <div class="expand" id="e${i}">
     <div class="expand-inner">
